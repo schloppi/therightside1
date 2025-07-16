@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rightside - AI Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #ece6e8;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #ece6e8;
+            padding: 1rem;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-shrink: 0;
+            gap: 1rem;
+        }
+
+        .logo-image {
+            width: 40px;
+            height: 40px;
+            background-color: #000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-image svg {
+            width: 24px;
+            height: 24px;
+            fill: #fff;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: #ece6e8;
+        }
+
+        .nav-btn {
+            background-color: transparent;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .nav-btn:hover {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background-color: #2563eb;
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.assistant .message-content {
+            background-color: #fff;
+            color: #374151;
+            border-bottom-left-radius: 0.25rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .input-container {
+            padding: 1rem;
+            background-color: #fff;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 2rem;
+            resize: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            max-height: 120px;
+        }
+
+        .message-input:focus {
+            border-color: #2563eb;
+        }
+
+        .send-btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .send-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .service-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ece6e8;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .service-overlay.active {
+            transform: translateY(0);
+        }
+
+        .service-header {
+            background-color: #ece6e8;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #6b7280;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+            font-weight: 100;
+            line-height: 1;
+        }
+
+        .close-btn::before {
+            content: "×";
+            font-weight: 100;
+            transform: scaleX(0.7);
+        }
+
+        .close-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .service-content {
+            padding: 2rem 1rem;
+            flex: 1;
+            background-color: #ece6e8;
+        }
+
+        .service-content h2 {
+            font-size: 1.5rem;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        .service-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .service-item {
+            background-color: #fff;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .service-item h3 {
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.75rem 1rem;
+            background-color: #fff;
+            border-radius: 1rem;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 1rem;
+            max-width: 80%;
+        }
+
+        .typing-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #2563eb;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .typewriter-text {
+            display: inline;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .nav-btn {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            .input-container {
+                border-radius: 1rem 1rem 0 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-image">
+                <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M400 120c-20 0-40 5-55 15-10-25-35-40-65-40-15 0-30 5-40 15-5-10-15-20-30-20-25 0-45 20-45 45 0 10 3 20 8 28-15 15-25 35-25 57 0 15 5 30 12 42-8 12-12 26-12 40 0 30 15 55 38 70-5 15-8 30-8 45 0 25 10 48 28 65 8 8 18 12 28 12 5 0 10-1 15-3 20 15 45 25 72 25 15 0 30-3 43-8 18 12 40 20 62 20 35 0 65-20 80-50 8 5 18 8 28 8 25 0 45-20 45-45 0-15-7-28-18-36 12-18 18-40 18-62 0-25-8-48-22-67 10-15 15-33 15-52 0-40-25-75-62-88 5-12 8-25 8-38 0-35-28-63-63-63z"/>
+                </svg>
+            </div>
+            <div class="logo">The RightSide</div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message assistant">
+                    <div class="message-content" id="welcomeMessage">
+                        <span class="typing-cursor" id="typingCursor"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showServices()">Our Services</button>
+                <button class="nav-btn" onclick="bookCall()">Book a Call</button>
+                <button class="nav-btn" onclick="showArticles()">Articles</button>
+            </div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Ask me anything about The Rightside..."
+                        rows="1"
+                        onkeypress="handleKeyPress(event)"
+                        oninput="adjustTextareaHeight()"
+                    ></textarea>
+                    <button class="send-btn" onclick="sendMessage()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 19V5M5 12l7-7 7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="service-overlay" id="serviceOverlay">
+        <div class="service-header">
+            <div class="service-title">Our Services</div>
+            <button class="close-btn" onclick="closeServices()"></button>
+        </div>
+        <div class="service-content">
+            <h2>These are our services:</h2>
+            <ul class="service-list">
+                <li class="service-item">
+                    <h3>AI Consulting</h3>
+                    <p>Expert guidance on implementing AI solutions for your business needs.</p>
+                </li>
+                <li class="service-item">
+                    <h3>Custom AI Development</h3>
+                    <p>Tailored AI applications and chatbots designed specifically for your industry.</p>
+                </li>
+                <li class="service-item">
+                    <h3>AI Training & Education</h3>
+                    <p>Comprehensive training programs to help your team leverage AI effectively.</p>
+                </li>
+                <li class="service-item">
+                    <h3>Data Analytics</h3>
+                    <p>Advanced analytics and insights to drive informed business decisions.</p>
+                </li>
+                <li class="service-item">
+                    <h3>Process Automation</h3>
+                    <p>Streamline operations with intelligent automation solutions.</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const serviceOverlay = document.getElementById('serviceOverlay');
+
+        // Company knowledge base
+        const companyInfo = {
+            name: "The RightSide",
+            about: "The RightSide is an AI and Quantum consulting agency operating in all of Europe. We help businesses implement cutting-edge artificial intelligence and quantum solutions.",
+            services: [
+                "AI Strategy",
+                "Action plan",
+                "Reskilling",
+                "Solution design and implementation"
+            ],
+            contact: "I encourage you to get in touch with our team to discuss how we can help your business leverage AI and quantum technologies.",
+            experience: "We operate across all of Europe, providing comprehensive AI and quantum consulting services to businesses of all sizes.",
+            team: "Our team consists of experienced AI engineers, quantum computing specialists, and business consultants who are passionate about helping European businesses succeed with cutting-edge technologies.",
+            approach: "We take a strategic approach to AI and quantum implementation, focusing on practical solutions that deliver real business value through our comprehensive services including AI strategy, action planning, reskilling, and full solution design and implementation."
+        };
+
+        // Initialize welcome message with typewriter effect
+        function typeWriter(text, element, speed = 50) {
+            let i = 0;
+            const cursor = document.getElementById('typingCursor');
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML = text.substring(0, i + 1) + '<span class="typing-cursor" id="typingCursor"></span>';
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    // Remove cursor after typing is complete
+                    element.innerHTML = text;
+                }
+            }
+            type();
+        }
+
+        function addMessage(content, isUser = false, useTypewriter = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            if (!isUser && useTypewriter) {
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageDiv.appendChild(messageContent);
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Use typewriter effect for assistant messages
+                typeWriter(content, messageContent);
+            } else {
+                messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function generateResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // Specific questions about The RightSide
+            if (message.includes('rightside') || message.includes('right side') || message.includes('your company') || message.includes('who are you')) {
+                return `${companyInfo.about} Our services include ${companyInfo.services.join(', ')}. ${companyInfo.contact}`;
+            }
+            
+            if (message.includes('service') && (message.includes('rightside') || message.includes('your') || message.includes('what do you do'))) {
+                return `At The RightSide, we specialize in ${companyInfo.services.join(', ')}. We operate across all of Europe, helping businesses harness the power of AI and quantum technologies. ${companyInfo.contact}`;
+            }
+            
+            if (message.includes('europe') || message.includes('location') || message.includes('where')) {
+                return `The RightSide operates throughout all of Europe, bringing AI and quantum consulting services directly to businesses across the continent. ${companyInfo.contact}`;
+            }
+            
+            // AI-related questions (general)
+            if (message.includes('artificial intelligence') || message.includes(' ai ') || message.includes('machine learning') || message.includes('automation')) {
+                const aiResponses = [
+                    "AI is transforming industries across Europe! From healthcare to manufacturing, businesses are leveraging machine learning, automation, and intelligent systems to gain competitive advantages. What industry are you in?",
+                    "Artificial intelligence offers incredible opportunities - predictive analytics, process automation, customer insights, and operational efficiency. The key is having the right strategy and implementation approach.",
+                    "AI adoption varies by industry, but common applications include chatbots, recommendation systems, predictive maintenance, and data analytics. What specific AI challenges are you facing?",
+                    "Machine learning can revolutionize decision-making by finding patterns in data that humans might miss. It's particularly powerful for forecasting, personalization, and risk assessment."
+                ];
+                return aiResponses[Math.floor(Math.random() * aiResponses.length)];
+            }
+            
+            // Quantum-related questions
+            if (message.includes('quantum') || message.includes('quantum computing')) {
+                const quantumResponses = [
+                    "Quantum computing is on the horizon of practical application! While still emerging, it promises to solve complex optimization problems, enhance cryptography, and accelerate scientific simulations that classical computers struggle with.",
+                    "Quantum technology is particularly exciting for industries like pharmaceuticals, finance, and logistics. It could revolutionize drug discovery, portfolio optimization, and supply chain management.",
+                    "The quantum advantage lies in its ability to process multiple possibilities simultaneously. This makes it ideal for complex problem-solving that would take classical computers years to complete.",
+                    "While quantum computing is still developing, smart businesses are already exploring how quantum algorithms could benefit their operations in the coming years."
+                ];
+                return quantumResponses[Math.floor(Math.random() * quantumResponses.length)];
+            }
+            
+            // Business and strategy questions
+            if (message.includes('strategy') || message.includes('business') || message.includes('digital transformation')) {
+                const strategyResponses = [
+                    "Digital transformation success depends on having a clear strategy, stakeholder buy-in, and the right technology partners. What's your biggest challenge in your transformation journey?",
+                    "A good technology strategy aligns with business goals, considers your team's capabilities, and includes a realistic timeline for implementation. Are you looking to modernize specific processes?",
+                    "Business transformation often requires reskilling teams alongside technology adoption. Change management is just as important as the technical implementation.",
+                    "The most successful digital initiatives start with understanding your current state, defining clear objectives, and building capabilities incrementally."
+                ];
+                return strategyResponses[Math.floor(Math.random() * strategyResponses.length)];
+            }
+            
+            // Greetings
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                const greetings = [
+                    "Hello! Great to meet you. I'm here to discuss AI, quantum computing, digital transformation, and how technology can drive business success. What's on your mind?",
+                    "Hi there! I love talking about emerging technologies and business innovation. What industry are you in, and what challenges are you facing?",
+                    "Hey! Whether you're curious about AI applications, quantum computing, or digital strategy, I'm here to help. What would you like to explore?",
+                    "Hello! I'm passionate about helping businesses understand and leverage cutting-edge technologies. What brings you here today?"
+                ];
+                return greetings[Math.floor(Math.random() * greetings.length)];
+            }
+            
+            // Thanks
+            if (message.includes('thank') || message.includes('thanks')) {
+                const thanks = [
+                    "You're very welcome! I'm always happy to discuss technology, innovation, and business transformation. Feel free to ask about anything else!",
+                    "My pleasure! Technology and business strategy are fascinating topics. Is there anything specific you'd like to dive deeper into?",
+                    "Glad I could help! Whether it's AI, quantum computing, or business strategy, I'm here for more questions.",
+                    "You're welcome! I enjoy these conversations about technology and innovation. What else can we explore together?"
+                ];
+                return thanks[Math.floor(Math.random() * thanks.length)];
+            }
+            
+            // General technology questions
+            if (message.includes('technology') || message.includes('innovation') || message.includes('future')) {
+                const techResponses = [
+                    "Technology is evolving rapidly! AI, quantum computing, IoT, and blockchain are reshaping how businesses operate. Which technologies are you most curious about?",
+                    "Innovation in technology often comes from combining different approaches - like using AI to optimize quantum algorithms, or applying machine learning to business processes.",
+                    "The future of business is increasingly digital and data-driven. Companies that embrace emerging technologies early often gain significant competitive advantages.",
+                    "Staying ahead in technology means continuous learning and strategic implementation. What technological challenges is your organization facing?"
+                ];
+                return techResponses[Math.floor(Math.random() * techResponses.length)];
+            }
+            
+            // Default responses for other topics
+            const defaultResponses = [
+                "That's an interesting question! I specialize in discussing AI, quantum computing, and business technology strategy. How might these technologies relate to what you're asking about?",
+                "I'd love to help you explore that further! My expertise is in emerging technologies and business innovation. What aspects are you most curious about?",
+                "Great question! While I focus on AI and quantum consulting topics, I'm curious - how might technology solutions address what you're thinking about?",
+                "That's thought-provoking! I'm passionate about technology and business strategy. Could you tell me more about the context of your question?",
+                "Interesting perspective! I enjoy discussing how technology can solve business challenges. What's driving your interest in this area?"
+            ];
+            
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            messageInput.value = '';
+            adjustTextareaHeight();
+
+            showTyping();
+            
+            // Simulate AI response delay
+            setTimeout(() => {
+                hideTyping();
+                const response = generateResponse(message);
+                addMessage(response, false, true); // Use typewriter effect
+            }, 1500);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function adjustTextareaHeight() {
+            const textarea = messageInput;
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function showServices() {
+            serviceOverlay.classList.add('active');
+        }
+
+        function closeServices() {
+            serviceOverlay.classList.remove('active');
+        }
+
+        function bookCall() {
+            addMessage("I'd like to book a call with your team.", true);
+            setTimeout(() => {
+                addMessage("Excellent! I'll connect you with our scheduling system. You can book a convenient time slot with one of our AI consultants who will discuss your specific needs and how The Rightside can help your business. Would you prefer a discovery call to explore opportunities or do you have a specific project in mind?");
+            }, 1000);
+        }
+
+        function showArticles() {
+            addMessage("I'd like to see your articles.", true);
+            setTimeout(() => {
+                addMessage("Great! We regularly publish insights about AI trends, implementation strategies, and success stories. Our articles cover topics like AI transformation, machine learning applications, and practical guides for businesses. Would you like me to tell you about any specific AI topic or recent developments in the field?");
+            }, 1000);
+        }
+
+        // Close service overlay when clicking outside
+        serviceOverlay.addEventListener('click', (e) => {
+            if (e.target === serviceOverlay) {
+                closeServices();
+            }
+        });
+
+        // Initialize welcome message on page load
+        window.addEventListener('load', () => {
+            const welcomeText = "Hello and welcome to The RightSide, we are an AI and Quantum consulting agency.";
+            const welcomeElement = document.getElementById('welcomeMessage');
+            typeWriter(welcomeText, welcomeElement);
+            messageInput.focus();
+        });
+    </script>
+</body>
+</html>
