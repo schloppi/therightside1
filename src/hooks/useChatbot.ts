@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 
 // Webhook configuration
-const WEBHOOK_URL = 'https://n8n.therightside.work/webhook/website-theightside';
+const WEBHOOK_URL = 'https://n8n.therightside.work/webhook-test/website-theightside';
 
 // Function to log events to webhook
 const logEventToWebhook = async (data: any) => {
