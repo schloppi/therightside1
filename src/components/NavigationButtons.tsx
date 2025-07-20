@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Webhook configuration
-const WEBHOOK_URL = 'https://n8n.therightside.work/webhook/website-theightside';
+const WEBHOOK_URL = 'https://n8n.therightside.work/webhook-test/website-theightside';
 
 // Function to send data to webhook
 const logEventToWebhook = async (data: any) => {
