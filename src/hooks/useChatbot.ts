@@ -44,29 +44,17 @@ const sendToWebhook = async (message: string): Promise<string> => {
       }),
     });
 
-    // Wait for the webhook response regardless of status code
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const responseText = await response.text();
     
-    if (!response.ok) {
-      // Only show error message if webhook returns an error status
-      return "Unable to connect to server";
-    }
-    
-    if (!responseText || responseText.trim() === '') {
-      return "Unable to connect to server";
-    }
-    
-    try {
-      const data = JSON.parse(responseText);
-      // Return the response from the webhook, or show error if no response
-      return data.response || "Unable to connect to server";
-    } catch (parseError) {
-      // If we can't parse JSON, treat the raw text as the response
-      return responseText.trim() || "Unable to connect to server";
-    }
+    // Return the webhook response directly
+    return responseText || "No response received from server";
   } catch (error) {
     console.error('Failed to send to webhook:', error);
-    return "Unable to connect to server";
+    return "I'm having trouble connecting to the server right now. Please try again in a moment.";
   }
 };
 
