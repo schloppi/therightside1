@@ -48,10 +48,21 @@ const sendToWebhook = async (message: string): Promise<string> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const responseText = await response.text();
+    const responseData = await response.json();
     
-    // Return the webhook response directly
-    return responseText || "No response received from server";
+    // Extract just the content/output from the response
+    if (responseData && typeof responseData === 'object') {
+      // Try common response field names
+      const content = responseData.output || responseData.content || responseData.message || responseData.response || responseData.text;
+      if (content && typeof content === 'string') {
+        return content;
+      }
+      // If no standard field found, convert the whole object to string
+      return JSON.stringify(responseData);
+    }
+    
+    // If it's already a string, return it
+    return typeof responseData === 'string' ? responseData : "No response received from server";
   } catch (error) {
     console.error('Failed to send to webhook:', error);
     return "I'm having trouble connecting to the server right now. Please try again in a moment.";
