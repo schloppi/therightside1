@@ -19,6 +19,9 @@ const logEventToWebhook = async (data: any) => {
   }
 };
 
+// Generate a session ID that persists until page refresh
+const SESSION_ID = 'web_chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
 interface Message {
   id: string;
   content: string;
@@ -38,7 +41,7 @@ const sendToWebhook = async (message: string): Promise<string> => {
         type: 'user_message',
         message: message,
         timestamp: new Date().toISOString(),
-        sessionId: 'web_chat_' + Date.now(),
+        sessionId: SESSION_ID,
         userAgent: navigator.userAgent,
         url: window.location.href
       }),

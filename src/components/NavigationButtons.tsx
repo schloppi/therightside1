@@ -18,6 +18,9 @@ const logEventToWebhook = async (data: any) => {
   }
 };
 
+// Generate a session ID that persists until page refresh
+const SESSION_ID = 'web_chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
 interface NavigationButtonsProps {
   onShowServices: () => void;
   onBookCall: () => void;
@@ -34,7 +37,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
       type: 'button_click',
       button: 'services',
       timestamp: new Date().toISOString(),
-      sessionId: 'web_chat_' + Date.now(),
+      sessionId: SESSION_ID,
       userAgent: navigator.userAgent,
       url: window.location.href
     });
@@ -46,7 +49,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
       type: 'button_click',
       button: 'book_call',
       timestamp: new Date().toISOString(),
-      sessionId: 'web_chat_' + Date.now(),
+      sessionId: SESSION_ID,
       userAgent: navigator.userAgent,
       url: window.location.href
     });
@@ -58,7 +61,7 @@ export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
       type: 'button_click',
       button: 'articles',
       timestamp: new Date().toISOString(),
-      sessionId: 'web_chat_' + Date.now(),
+      sessionId: SESSION_ID,
       userAgent: navigator.userAgent,
       url: window.location.href
     });
